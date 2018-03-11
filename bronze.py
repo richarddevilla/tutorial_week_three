@@ -61,8 +61,52 @@ def create_entry(quantity):
                         )
                     )
             conn.commit()
+        print(i)
+
+def search_data(pattern):
+    with sqlite3.connect(db_path) as conn:
+        c = conn.cursor()
+        c.execute("""
+                    SELECT (profile.first_name || " " || profile.last_name),
+                    profile.phone_number1,
+                    profile.phone_number2,
+                    profile.birth_date,
+                    (address.line1 || " " ||
+                    address.line3 || " " ||
+                    address.line4 || " " ||
+                    address.street || " " ||
+                    address.suburb || " " ||
+                    address.postcode || " " ||
+                    address.state || " " ||
+                    address.country)
+                    FROM profile
+                    LEFT JOIN address ON  profile.address_id=address.id
+                    WHERE profile.first_name LIKE '%{0}%'
+                    OR profile.last_name LIKE '%{0}%' 
+                    OR profile.phone_number1 LIKE '%{0}%'
+                    OR profile.phone_number2 LIKE '%{0}%'
+                    OR profile.birth_date LIKE '%{0}%'
+                    OR address.line1 LIKE '%{0}%'
+                    OR address.line2 LIKE '%{0}%'
+                    OR address.line3 LIKE '%{0}%'
+                    OR address.line4 LIKE '%{0}%'
+                    OR address.street LIKE '%{0}%'
+                    OR address.suburb LIKE '%{0}%'
+                    OR address.postcode LIKE '%{0}%'
+                    OR address.state LIKE '%{0}%'
+                    OR address.country LIKE '%{0}%';
+                  """.format(pattern)
+                  )
+        result=[]
+        for each in c.fetchall():
+            result.append(each)
+        print('DB searched!!')
+        return result
 
 if __name__ == '__main__':
-    if not path.exists(db_path): create_table()
-    my_timer = timeit.timeit(stmt='create_entry(10000)', number=1,setup="from __main__ import create_entry")
+    if not path.exists(db_path): create_table(db_path)
+    create_entry(10000)
+    pattern = input('Seacrh for :')
+    my_timer = timeit.timeit(stmt='search_data(pattern)', number=1,setup="from __main__ import search_data, pattern")
     print(my_timer)
+
