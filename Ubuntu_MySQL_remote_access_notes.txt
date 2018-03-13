@@ -1,0 +1,35 @@
+#Allowing Remote Access for MySQL on UBUNTU
+#https://stackoverflow.com/questions/15663001/remote-connections-mysql-ubuntu
+
+#On terminal type in
+#For mysql version 5.7 and above
+sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
+#For mysql version 5.6 and below
+sudo gedit /etc/mysql/my.cnf
+
+#that should open the notepad lond for the parameter 
+#bind-address use 0.0.0.0 if you dont want to specify IP address of YOUR server
+#otherwise use your current IP
+bind-address		= XXX.XXX.XXX.XXX
+#save your changes and exit notpad
+#CTRL+C on terminal to exit 
+
+#on the terminal
+mysql -u 'username' -p
+#type in your Mysql password
+
+#Add a Remote user 
+#change myuser to your own username and mypass to your own password
+#keep the rest the same. you create one as @'localhost' and @'%'
+CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypass';
+CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypass';
+
+#grant them privilege wildcard *.* gives them full access
+GRANT ALL ON *.* TO 'myuser'@'localhost';
+GRANT ALL ON *.* TO 'myuser'@'%';
+
+#finally
+FLUSH PRIVILEGES;
+EXIT;
+
+#now try if you can remotely connect to your SQL
