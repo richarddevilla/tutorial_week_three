@@ -19,6 +19,5 @@ create table address (
     suburb       TEXT DEFAULT '',
     postcode     TEXT DEFAULT '',
     state        TEXT DEFAULT '',
-    country      TEXT DEFAULT '',
-    profile_id   INTEGER
+    country      TEXT DEFAULT ''
 );

@@ -3,17 +3,19 @@ import timeit
 from faker import Faker
 from os import path
 
+
 base_dir = path.dirname(path.abspath(__file__))
 db_path = path.join(base_dir,'profile.db')
 schema_path = path.join(base_dir,'schema.sql')
 fake_gen = Faker('en_AU')
 
-def create_table(db_path):
+def create_table():
     with sqlite3.connect(db_path) as conn:
         with open(schema_path, 'rt') as f:
             schema = f.read()
         conn.executescript(schema)
         print('Table created!')
+
 
 def create_entry(quantity):
     for i in range(1,quantity):
@@ -29,9 +31,9 @@ def create_entry(quantity):
                         'country'
                         )
                         VALUES(
-                          "{}","{}","{}","{}","{}","{}"
+                          ?,?,?,?,?,?
                         )
-                      """.format(
+                      """,(
                         fake_gen.building_number(),
                         fake_gen.street_name(),
                         fake_gen.city(),
@@ -50,9 +52,9 @@ def create_entry(quantity):
                         'address_id'
                         )
                         VALUES(
-                          "{}","{}","{}","{}","{}",LAST_INSERT_ROWID()
+                          ?,?,?,?,?,LAST_INSERT_ROWID()
                         )
-                      """.format(
+                      """,(
                         fake_gen.first_name(),
                         fake_gen.last_name(),
                         fake_gen.phone_number(),
@@ -64,6 +66,7 @@ def create_entry(quantity):
         print(i)
 
 def search_data(pattern):
+    pattern = '%'+pattern+'%'
     with sqlite3.connect(db_path) as conn:
         c = conn.cursor()
         c.execute("""
@@ -81,21 +84,21 @@ def search_data(pattern):
                     address.country)
                     FROM profile
                     LEFT JOIN address ON  profile.address_id=address.id
-                    WHERE profile.first_name LIKE '%{0}%'
-                    OR profile.last_name LIKE '%{0}%' 
-                    OR profile.phone_number1 LIKE '%{0}%'
-                    OR profile.phone_number2 LIKE '%{0}%'
-                    OR profile.birth_date LIKE '%{0}%'
-                    OR address.line1 LIKE '%{0}%'
-                    OR address.line2 LIKE '%{0}%'
-                    OR address.line3 LIKE '%{0}%'
-                    OR address.line4 LIKE '%{0}%'
-                    OR address.street LIKE '%{0}%'
-                    OR address.suburb LIKE '%{0}%'
-                    OR address.postcode LIKE '%{0}%'
-                    OR address.state LIKE '%{0}%'
-                    OR address.country LIKE '%{0}%';
-                  """.format(pattern)
+                    WHERE profile.first_name LIKE ?
+                    OR profile.last_name LIKE ? 
+                    OR profile.phone_number1 LIKE ?
+                    OR profile.phone_number2 LIKE ?
+                    OR profile.birth_date LIKE ?
+                    OR address.line1 LIKE ?
+                    OR address.line2 LIKE ?
+                    OR address.line3 LIKE ?
+                    OR address.line4 LIKE ?
+                    OR address.street LIKE ?
+                    OR address.suburb LIKE ?
+                    OR address.postcode LIKE ?
+                    OR address.state LIKE ?
+                    OR address.country LIKE ?;
+                  """,([pattern]*14)
                   )
         result=[]
         for each in c.fetchall():
@@ -104,8 +107,8 @@ def search_data(pattern):
         return result
 
 if __name__ == '__main__':
-    if not path.exists(db_path): create_table(db_path)
-    create_entry(10000)
+    if not path.exists(db_path): create_table()
+    create_entry(20000)
     pattern = input('Seacrh for :')
     my_timer = timeit.timeit(stmt='search_data(pattern)', number=1,setup="from __main__ import search_data, pattern")
     print(my_timer)
