@@ -12,8 +12,6 @@ systemctl status mysql.service
 #opening mysql on terminal
 mysql -u root -p
 
-
-
 #Python connector procedure
 #requirements downgrade python version to 3.4
 pip install mysql-connector-python

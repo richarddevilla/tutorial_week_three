@@ -1,7 +1,7 @@
 create table profile (
     id           INTEGER PRIMARY KEY autoincrement NOT NULL,
-    first_name   TEXT DEFAULT '',
-    last_name    TEXT DEFAULT '',
+    first_name   TEXT,
+    last_name    TEXT,
     address_id   INTEGER,
     phone_number1 TEXT,
     phone_number2 TEXT,
@@ -11,13 +11,10 @@ create table profile (
 
 create table address (
     id           INTEGER PRIMARY KEY autoincrement NOT NULL,
-    line1        TEXT DEFAULT '',
-    line2        TEXT DEFAULT '',
-    line3        TEXT DEFAULT '',
-    line4        TEXT DEFAULT '',
-    street       TEXT DEFAULT '',
-    suburb       TEXT DEFAULT '',
-    postcode     TEXT DEFAULT '',
-    state        TEXT DEFAULT '',
-    country      TEXT DEFAULT ''
+    line1        TEXT,
+    street       TEXT,
+    suburb       TEXT,
+    postcode     TEXT,
+    state        TEXT,
+    country      TEXT
 );

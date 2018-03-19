@@ -11,8 +11,7 @@ sudo gedit /etc/mysql/my.cnf
 #bind-address use 0.0.0.0 if you dont want to specify IP address of YOUR server
 #otherwise use your current IP
 bind-address		= XXX.XXX.XXX.XXX
-#save your changes and exit notpad
-#CTRL+C on terminal to exit 
+#save your changes
 
 #on the terminal
 mysql -u 'username' -p
@@ -21,15 +20,22 @@ mysql -u 'username' -p
 #Add a Remote user 
 #change myuser to your own username and mypass to your own password
 #keep the rest the same. you create one as @'localhost' and @'%'
-CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypass';
-CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypass';
+CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
+CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypassword';
 
 #grant them privilege wildcard *.* gives them full access
 GRANT ALL ON *.* TO 'myuser'@'localhost';
 GRANT ALL ON *.* TO 'myuser'@'%';
 
+
+
+
 #finally
 FLUSH PRIVILEGES;
 EXIT;
 
-#now try if you can remotely connect to your SQL
+#open port
+lsof -i -P | grep :3306
+
+#restart mysql
+sudo service mysql restart
