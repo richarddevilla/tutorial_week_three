@@ -34,8 +34,8 @@ TABLES['address'] = (
     ") ENGINE=InnoDB")
 DB_NAME = 'profile'
 mysqlconn = mysql.connector.connect(user='richard',
-    password='password',
-    host='35.189.34.179')
+                                    password='password',
+                                    host='35.189.34.179')
     #host='35.185.54.69')
 mysqlcursor = mysqlconn.cursor()
 sqliteconn = sqlite3.connect(DB_PATH)
@@ -64,7 +64,6 @@ def create_table():
         print('SQLite3 Database profile created!')
     except Exception:
         print('SQLite3 Database already exist')
-
 
 def create_fakes(quantity):
     fakes = []
