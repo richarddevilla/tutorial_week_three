@@ -52,7 +52,7 @@ def create_search_win():
 def create_search_result():
     search_result.delete(*search_result.get_children())
     start_search = time.clock()
-    result = bronze_db.search_data(search_var.get())
+    result = bronze_db.sqlite_search_data(search_var.get())
     end_search = time.clock()-start_search
     msg.showinfo('Search Complete','Total time to search DataBase is {} seconds'.format(end_search))
     show_result(result)
@@ -60,7 +60,7 @@ def create_search_result():
 def create_mysqlsearch_result():
     search_result.delete(*search_result.get_children())
     start_search = time.clock()
-    result = bronze_db.mysqlsearch_data(search_var.get())
+    result = bronze_db.mysql_search_data(search_var.get())
     end_search = time.clock()-start_search
     msg.showinfo('Search Complete', 'Total time to search DataBase is {} seconds'.format(end_search))
     show_result(result)
@@ -68,7 +68,7 @@ def create_mysqlsearch_result():
 def create_mysqlindex_result():
     search_result.delete(*search_result.get_children())
     start_search = time.clock()
-    result = bronze_db.mysqlsearch_index(search_var.get())
+    result = bronze_db.mysql_search_index(search_var.get())
     end_search = time.clock()-start_search
     msg.showinfo('Search Complete', 'Total time to search DataBase is {} seconds'.format(end_search))
     show_result(result)
@@ -76,7 +76,7 @@ def create_mysqlindex_result():
 def create_searchindex_result():
     search_result.delete(*search_result.get_children())
     start_search = time.clock()
-    result = bronze_db.search_index(search_var.get())
+    result = bronze_db.sqlite_search_index(search_var.get())
     end_search = time.clock()-start_search
     msg.showinfo('Search Complete','Total time to search DataBase is {} seconds'.format(end_search))
     show_result(result)

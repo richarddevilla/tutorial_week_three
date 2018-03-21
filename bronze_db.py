@@ -1,71 +1,67 @@
+#
+# This .py file have functions to generate fake profiles
+# and store them in a SQLite and MySQL database
+#
 import mysql.connector
 import sqlite3
 import time
 from faker import Faker
 from os import path
 
-
+#Static variables
 BASE_DIR = path.dirname(path.abspath(__file__))
 DB_PATH = path.join(BASE_DIR, 'profile.db')
-SCHEMA_PATH = path.join(BASE_DIR, 'schema.sql')
-
-TABLES = {}
-TABLES['profile'] = (
-    "CREATE TABLE `profile` ("
-    "  `id` int(11) AUTO_INCREMENT,"
-    "  `birth_date` date,"
-    "  `first_name` varchar(30),"
-    "  `last_name` varchar(30),"
-    "  `phone_number1` varchar(30),"
-    "  `phone_number2` varchar(30),"
-    "  `address_id` int(11) REFERENCES `address`(`id`),"
-    "  PRIMARY KEY (`id`)"
-    ") ENGINE=InnoDB")
-TABLES['address'] = (
-    "CREATE TABLE `address` ("
-    "   `id`    int(11)  AUTO_INCREMENT,"
-    "   `line1` varchar(100) DEFAULT '',"
-    "   `street` varchar(100) DEFAULT '',"
-    "   `suburb` varchar(100)  DEFAULT '',"
-    "   `postcode` varchar(100) DEFAULT '',"
-    "   `state` varchar(100) DEFAULT '',"
-    "   `country` varchar(100) DEFAULT 'Australia',"
-    "  PRIMARY KEY (`id`)"
-    ") ENGINE=InnoDB")
+SQLITE_SCHEMA_PATH = path.join(BASE_DIR, 'sqlite_schema.sql')
+MYSQL_SCHEMA_PATH = path.join(BASE_DIR, 'mysql_schema.sql')
 DB_NAME = 'profile'
-mysqlconn = mysql.connector.connect(user='richard',
-                                    password='password',
-                                    host='35.189.34.179')
-    #host='35.185.54.69')
-mysqlcursor = mysqlconn.cursor()
-sqliteconn = sqlite3.connect(DB_PATH)
-sqlitec = sqliteconn.cursor()
+
+#fake generator profile set to return Australian profiles
 fake_gen = Faker('en_AU')
 
-def mysqlcreate_db():
-    try:
-        print('Checking if MySQL Database exist')
-        mysqlcursor.execute('CREATE DATABASE {};'.format(DB_NAME))
-        print('MySQL Database {} created!\n'.format(DB_NAME))
-        mysqlconn.database = DB_NAME
-        for name, ddl in TABLES.items():
-            print("Creating table {}: \n".format(name), end='')
-            mysqlcursor.execute(ddl)
-    except Exception:
-        mysqlconn.database = DB_NAME
-        print('MySQL Database already exist')
+#create MySQL connector and cursor
+mysql_conn = mysql.connector.connect(user='richard',
+                                     password='password',
+                                     host='35.189.34.179')
+mysql_cursor = mysql_conn.cursor()
 
-def create_table():
+#create SQLite3 connector and cursor
+sqlite_conn = sqlite3.connect(DB_PATH)
+sqlite_cursor = sqlite_conn.cursor()
+
+def mysql_create_db():
+    """
+        Create MySQL Database and Tables if not already existing
+    """
+    print('Checking if MySQL Database exist')
+    try:
+        with open(MYSQL_SCHEMA_PATH, 'rt') as f:
+            schema = f.read().split(';')
+            for command in schema:
+                mysql_cursor.execute(command)
+            print('MySQL Database profile created!')
+    except:
+        print('MySQL Database already exist')
+    finally:
+        mysql_conn.database = DB_NAME
+
+def sqlite_create_db():
+    """
+        Create sqlite Database and Tables if not already existing
+    """
     try:
         print('Checking if SQLite3 Database exist')
-        with open(SCHEMA_PATH, 'rt') as f:
+        with open(SQLITE_SCHEMA_PATH, 'rt') as f:
             schema = f.read()
-            sqliteconn.executescript(schema)
+            sqlite_conn.executescript(schema)
         print('SQLite3 Database profile created!')
     except Exception:
         print('SQLite3 Database already exist')
 
 def create_fakes(quantity):
+    """
+    :param quantity: integer
+    :return: list of contact info, size of list depends on param quantity
+    """
     fakes = []
     for i in range(0,quantity):
         fake=(fake_gen.building_number(),
@@ -87,92 +83,114 @@ def create_fakes(quantity):
     return fakes
 
 def insert_fakes(entries):
+    """
+    :param entries: list of contact info
+
+    function takes a list of mutliple personal info.
+     iterate through the info and insert it
+     to MySQL and Sqlite3 prints execution time on console
+    """
     data = create_fakes(entries)
     start = time.clock()
     for each in data:
-        sqlitecreate_entry(each)
-    sqliteconn.commit()
+        sqlite_create_entry(each)
+    sqlite_conn.commit()
     end = time.clock()
     print('Insert SQLite total time '+str(end-start))
-    mysqlconn.database = DB_NAME
     start = time.clock()
     for each in data:
-        mysqlcreate_entry(each)
-    mysqlconn.commit()
+        mysql_create_entry(each)
+    mysql_conn.commit()
     end = time.clock()
     print('Insert MySQL total time ' + str(end - start))
 
-def sqlitecreate_entry(data):
-        sqlitec.execute("""
-                    INSERT INTO address(
-                    'line1',
-                    'street',
-                    'suburb',
-                    'postcode',
-                    'state',
-                    'country'
-                    )
-                    VALUES(
-                      ?,?,?,?,?,?
-                    )
-                  """, (
-                    data[0:6]
-                    )
-                        )
-        sqlitec.execute("""
-                    INSERT INTO profile(
-                    'first_name',
-                    'last_name',
-                    'phone_number1',
-                    'phone_number2',
-                    'birth_date',
-                    'address_id'
-                    )
-                    VALUES(
-                      ?,?,?,?,?,LAST_INSERT_ROWID()
-                    )
-                  """, (
-                    data[6:]
-                    )
-                        )
+def sqlite_create_entry(data):
+    """
+    :param data: list of a single person's info
+    function would insert the info to Sqlite3 database
+    """
+    sqlite_cursor.execute("""
+                INSERT INTO address(
+                'line1',
+                'street',
+                'suburb',
+                'postcode',
+                'state',
+                'country'
+                )
+                VALUES(
+                  ?,?,?,?,?,?
+                )
+              """, (
+                data[0:6]
+                )
+                          )
+    sqlite_cursor.execute("""
+                INSERT INTO profile(
+                'first_name',
+                'last_name',
+                'phone_number1',
+                'phone_number2',
+                'birth_date',
+                'address_id'
+                )
+                VALUES(
+                  ?,?,?,?,?,LAST_INSERT_ROWID()
+                )
+              """, (
+                data[6:]
+                )
+                          )
 
-def mysqlcreate_entry(data):
-        mysqlcursor.execute("""
-                    INSERT INTO address(
-                    `line1`,
-                    `street`,
-                    `suburb`,
-                    `postcode`,
-                    `state`
-                    )
-                    VALUES(
-                      %s,%s,%s,%s,%s
-                    )
-                  """, (
-                    data[0:5]
-                    )
-                        )
-        mysqlcursor.execute("""
-                    INSERT INTO profile(
-                    `first_name`,
-                    `last_name`,
-                    `phone_number1`,
-                    `phone_number2`,
-                    `birth_date`,
-                    `address_id`
-                    )
-                    VALUES(
-                      %s,%s,%s,%s,%s,LAST_INSERT_ID()
-                    )
-                  """, (
-                    data[6:]
-                    )
-                        )
+def mysql_create_entry(data):
+    """
+    :param data: list of a single person's info
+    function would insert the info to MySQL database
+    """
+    mysql_cursor.execute("""
+                INSERT INTO address(
+                `line1`,
+                `street`,
+                `suburb`,
+                `postcode`,
+                `state`
+                )
+                VALUES(
+                  %s,%s,%s,%s,%s
+                )
+              """, (
+                data[0:5]
+                )
+                         )
+    mysql_cursor.execute("""
+                INSERT INTO profile(
+                `first_name`,
+                `last_name`,
+                `phone_number1`,
+                `phone_number2`,
+                `birth_date`,
+                `address_id`
+                )
+                VALUES(
+                  %s,%s,%s,%s,%s,LAST_INSERT_ID()
+                )
+              """, (
+                data[6:]
+                )
+                         )
 
-def mysqlsearch_data(pattern):
+def mysql_search_data(pattern):
+    """
+    :param pattern: takes a string
+    :return result: list of match
+
+    function takes a pattern and look for the pattern in the MySQL database
+    this function would look into all fields and return the list of result
+    with the full info of the matches
+    """
+    mysql_cursor.execute('USE {};'.format(DB_NAME), multi=True)
     pattern = '%'+pattern+'%'
-    mysqlconn.database = DB_NAME
-    mysqlcursor.execute("""
+    mysql_cursor.execute("""
                 SELECT CONCAT_WS(' ',profile.first_name,profile.last_name),
                 profile.phone_number1,
                 profile.phone_number2,
@@ -196,15 +214,23 @@ def mysqlsearch_data(pattern):
                 OR address.postcode LIKE %s
                 OR address.state LIKE %s
                 OR address.country LIKE %s;
-              """,([pattern]*11)
-              )
+              """, ([pattern]*11)
+                         )
     result=[]
-    for each in mysqlcursor.fetchall():
+    for each in mysql_cursor.fetchall():
         result.append(each)
     print('MySQL Database searched!!')
     return result
 
-def search_data(pattern):
+def sqlite_search_data(pattern):
+    """
+    :param pattern: takes a string
+    :return result: list of match
+
+    function takes a pattern and look for the pattern in the Sqlite3 database
+    this function would look into all fields and return the list of result
+    with the full info of the matches
+    """
     pattern = '%'+pattern+'%'
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
@@ -240,10 +266,16 @@ def search_data(pattern):
         print('SQLite Database searched!!')
         return result
 
-def mysqlsearch_index(pattern):
+def mysql_search_index(pattern):
+    """
+    :param pattern: takes a string
+    :return result: list of match
+
+    function takes a pattern and look for the pattern in the MySQL database
+        this function would look into index and return the full info of the match
+    """
     pattern = pattern
-    mysqlconn.database = DB_NAME
-    mysqlcursor.execute("""
+    mysql_cursor.execute("""
                 SELECT CONCAT_WS(' ',profile.first_name,profile.last_name),
                 profile.phone_number1,
                 profile.phone_number2,
@@ -257,15 +289,22 @@ def mysqlsearch_index(pattern):
                 FROM profile
                 LEFT JOIN address ON  profile.address_id=address.id
                 WHERE profile.id=%s;
-              """,[pattern]
-              )
+              """, [pattern]
+                         )
     result=[]
-    for each in mysqlcursor.fetchall():
+    for each in mysql_cursor.fetchall():
         result.append(each)
     print('MySQL Database index searched!!')
     return result
 
-def search_index(pattern):
+def sqlite_search_index(pattern):
+    """
+        :param pattern: takes a string
+        :return result: list of match
+
+        function takes a pattern and look for the pattern in the Sqlite3 database
+        this function would look into index and return the full info of the match
+    """
     pattern = pattern
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
@@ -292,15 +331,23 @@ def search_index(pattern):
         return result
 
 def func_timer(func):
+    """
+    :param func: takes a function
+    :return runtime: time it takes for function to run
+    """
     start = time.clock()
     func
     end = time.clock()
     print(end-start)
+#calls the create_db functions
+sqlite_db = sqlite_create_db()
+mysql_db = mysql_create_db()
 
+#main program to use functions
 if __name__ == '__main__':
-    sqlite_db = create_table()
-    mysql_db = mysqlcreate_db()
     while True:
+        #Ask user to input quantity of fake records to create
+        #it must be a positive integer or 0
         try:
             entries = input('How many records should I insert to SQL?')
             entries = int(entries)
@@ -312,10 +359,15 @@ if __name__ == '__main__':
         except AssertionError:
             print('Please input a positive integer')
             continue
+    #insert fake records to MySQL and Sqlite3
     add_entries = insert_fakes(entries)
+    #Ask user to input a general search query
     general_pattern = input('Please input string to search')
-    func_timer(search_data(general_pattern))
-    func_timer(mysqlsearch_data(general_pattern))
+    #Run a search to all field in both database and return their time
+    func_timer(sqlite_search_data(general_pattern))
+    func_timer(mysql_search_data(general_pattern))
+    #Ask user to input an index search query
     index_pattern = input('Please input index to search')
-    func_timer(mysqlsearch_index(index_pattern))
-    func_timer(search_index(index_pattern))
+    # Run a search considering index only in both database and return their time
+    func_timer(mysql_search_index(index_pattern))
+    func_timer(sqlite_search_index(index_pattern))
