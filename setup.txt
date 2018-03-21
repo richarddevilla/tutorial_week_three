@@ -4,10 +4,15 @@ IDE:PyCharm 2017.3
 MYSQL:MySQL 5.7 on Google Cloud and\or MySQL 5.7 on Ubuntu 16.04LTS
 PYTHON:3.4
 
-#additional required python packages
+#required python packages
 tkinter
 faker 0.81
 mysql-python-connector 2.0.4
+
+#Additional Note
+place all files to the same directory.
+bronze_gui.py calls function from bronze_db.py
+bronze_db.py uses mysql_schema.sql and sqlite_schema.sql
 
 ------------------------------
 #installing MySQL on Ubuntu(I use the 5.7 version)

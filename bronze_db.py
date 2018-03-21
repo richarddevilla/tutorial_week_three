@@ -349,7 +349,8 @@ if __name__ == '__main__':
         #Ask user to input quantity of fake records to create
         #it must be a positive integer or 0
         try:
-            entries = input('How many records should I insert to SQL?')
+            entries = input('How many records should I insert to SQL?\n'
+                            '(more than 10,000 records might take awhile)\n')
             entries = int(entries)
             assert (entries >= 0)
             break
