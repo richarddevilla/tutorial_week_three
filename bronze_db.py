@@ -10,10 +10,10 @@ from os import path
 
 #Static variables
 BASE_DIR = path.dirname(path.abspath(__file__))
-DB_PATH = path.join(BASE_DIR, 'profile.db')
+DB_PATH = path.join(BASE_DIR, 'profile_1.db')
 SQLITE_SCHEMA_PATH = path.join(BASE_DIR, 'sqlite_schema.sql')
 MYSQL_SCHEMA_PATH = path.join(BASE_DIR, 'mysql_schema.sql')
-DB_NAME = 'profile'
+DB_NAME = 'profile_1'
 
 #fake generator profile set to return Australian profiles
 fake_gen = Faker('en_AU')

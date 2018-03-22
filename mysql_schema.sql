@@ -1,5 +1,5 @@
-CREATE DATABASE `profile`;
-USE `profile`;
+CREATE DATABASE `profile_1`;
+USE `profile_1`;
 CREATE TABLE `profile` (
       `id` int(11) AUTO_INCREMENT,
       `birth_date` date,
