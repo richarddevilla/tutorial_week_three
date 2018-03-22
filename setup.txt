@@ -1,7 +1,7 @@
 #Test Environment
 OS:Windows 10
 IDE:PyCharm 2017.3
-MYSQL:MySQL 5.7 on Google Cloud and\or MySQL 5.7 on Ubuntu 16.04LTS
+MYSQL:MySQL 5.7 on Google Cloud
 PYTHON:3.4
 
 #required python packages
@@ -13,51 +13,12 @@ mysql-python-connector 2.0.4
 place all files to the same directory.
 bronze_gui.py calls function from bronze_db.py
 bronze_db.py uses mysql_schema.sql and sqlite_schema.sql
+profile.db and mysql server have 120,104 identical records
 
-------------------------------
-#installing MySQL on Ubuntu(I use the 5.7 version)
-#https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-16-04
-sudo apt-get update
-sudo apt-get install mysql-server
-mysql_secure_installation
-
-#Allowing Remote Access for MySQL on UBUNTU
-#https://stackoverflow.com/questions/15663001/remote-connections-mysql-ubuntu
-
-#On terminal type in
-#For mysql version 5.7 and above.
-sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
-#For mysql version 5.6 and below
-sudo gedit /etc/mysql/my.cnf
-#if using CLI use vim instead of gedit
-
-#that should open the notepad lond for the parameter
-#bind-address use 0.0.0.0 if you dont want to specify IP address of YOUR server
-#otherwise use your current IP
-bind-address		= XXX.XXX.XXX.XXX
-#save your changes
-
-#on the terminal
-mysql -u 'username' -p
-#type in your Mysql password
-
-#Add a Remote user
-#change myuser to your own username and mypass to your own password
-#keep the rest the same. you create one as @'localhost' and @'%'
-CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'mypassword';
-CREATE USER 'myuser'@'%' IDENTIFIED BY 'mypassword';
-
-#grant them privilege wildcard *.* gives them full access
-GRANT ALL ON *.* TO 'myuser'@'localhost';
-GRANT ALL ON *.* TO 'myuser'@'%';
-
-#finally
-FLUSH PRIVILEGES;
-EXIT;
-
-#open port
-lsof -i -P | grep :3306
-
-#restart mysql
-sudo service mysql restart
+bronze.py - demonstrate simple creation of database
+broze_db.py - allows creation of sqlite3 database and have a fake info generator
+    just run and follow prompt if you wish to add more entry, be warned that 20,000
+    records and up would probably take mins or hours
+bronze_gui.py - display a form for a general search and index search on the
+    sqlite3 and MySQL database
 
